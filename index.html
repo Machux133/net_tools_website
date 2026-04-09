@@ -918,7 +918,10 @@ function urlDecode() {
 function b64Encode() {
   const input = document.getElementById('b64-enc-input').value;
   try {
-    document.getElementById('b64-enc-output').value = btoa(unescape(encodeURIComponent(input)));
+    const bytes = new TextEncoder().encode(input);
+    let binary = '';
+    bytes.forEach(b => { binary += String.fromCharCode(b); });
+    document.getElementById('b64-enc-output').value = btoa(binary);
   } catch (e) {
     document.getElementById('b64-enc-output').value = 'Error: ' + e.message;
   }
@@ -927,7 +930,9 @@ function b64Encode() {
 function b64Decode() {
   const input = document.getElementById('b64-dec-input').value.trim();
   try {
-    document.getElementById('b64-dec-output').value = decodeURIComponent(escape(atob(input)));
+    const binary = atob(input);
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    document.getElementById('b64-dec-output').value = new TextDecoder().decode(bytes);
   } catch (e) {
     document.getElementById('b64-dec-output').value = 'Error: Invalid Base64 input.';
   }
@@ -1012,8 +1017,7 @@ function copyResult(id) {
   const el = document.getElementById(id);
   if (!el || !el.value) return;
   navigator.clipboard.writeText(el.value).catch(() => {
-    el.select();
-    document.execCommand('copy');
+    /* Clipboard API unavailable in this context */
   });
 }
 
